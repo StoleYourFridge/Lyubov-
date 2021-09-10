@@ -11,7 +11,7 @@ private:
 public:
 	NaturalFraction();
 	NaturalFraction(int num, int den);
-	NaturalFraction(NaturalFraction& currFraction);
+	NaturalFraction(const NaturalFraction& currFraction);
 
 	int getNumerator();
 	int getDenominator();
@@ -29,6 +29,8 @@ public:
 	void operator+=(int term);
 	void operator-=(int term);
 	void operator/=(int term);
+
+	void operator=(const NaturalFraction& term);
 
 	bool operator==(const NaturalFraction& term);
 	bool operator!=(const NaturalFraction& term);

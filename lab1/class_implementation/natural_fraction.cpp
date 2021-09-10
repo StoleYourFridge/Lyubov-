@@ -15,10 +15,10 @@ NaturalFraction::NaturalFraction(int num, int den)
 	setNumerator(num);
 	setDenominator(den);
 }
-NaturalFraction::NaturalFraction(NaturalFraction& currFraction)
+NaturalFraction::NaturalFraction(const NaturalFraction& currFraction)
 {
-	numerator = currFraction.numerator;
-	denominator = currFraction.denominator;
+	setNumerator(currFraction.numerator);
+	setDenominator(currFraction.denominator);
 }
 
 int NaturalFraction::getNumerator() { return numerator; }
@@ -103,6 +103,12 @@ void NaturalFraction::operator-=(int term)
 void NaturalFraction::operator/=(int term)
 {
 	setDenominator(denominator * term);
+}
+
+void NaturalFraction::operator=(const NaturalFraction& term)
+{
+	numerator = term.numerator;
+	denominator = term.denominator;
 }
 
 bool NaturalFraction::operator==(const NaturalFraction& term)
@@ -261,6 +267,8 @@ void tests()
 	printTestResult(test82_84(new NaturalFraction(8,3), 4, new NaturalFraction(2,3)), &testsPassed);
 	printTestResult(test82_84(new NaturalFraction(10,7), 10, new NaturalFraction(1,7)), &testsPassed);
 	printTestResult(test82_84(new NaturalFraction(99,11), 9, new NaturalFraction(1,1)), &testsPassed);
+
+	printf("\nTests passed: %d out of 84\n\n", testsPassed);
 }
 
 void printTestResult(bool result, int* counter)
@@ -368,8 +376,7 @@ bool test25_28(NaturalFraction* fr1, NaturalFraction* fr2, bool expected)
 }
 bool test29_33(NaturalFraction* fr1, NaturalFraction* fr2, NaturalFraction* expected)
 {
-	NaturalFraction result;
-	result = *fr1 + *fr2;
+	NaturalFraction result = *fr1 + *fr2;
 	printf("Expected: %d/%d, Got: %d/%d; ", expected->getNumerator(), expected->getDenominator(), result.getNumerator(), result.getDenominator());
 	if (result == *expected) return true;
 	else return false;
@@ -383,8 +390,7 @@ bool test34_38(NaturalFraction* fr1, NaturalFraction* fr2, NaturalFraction* expe
 }
 bool test39_41(NaturalFraction* fr, int term, NaturalFraction* expected)
 {
-	NaturalFraction result;
-	result = *fr + term;
+	NaturalFraction result = *fr + term;
 	printf("Expected: %d/%d, Got: %d/%d; ", expected->getNumerator(), expected->getDenominator(), result.getNumerator(), result.getDenominator());
 	if (result == *expected) return true;
 	else return false;
@@ -398,8 +404,7 @@ bool test42_44(NaturalFraction* fr, int term, NaturalFraction* expected)
 }
 /*bool test45_49(NaturalFraction* fr1, NaturalFraction* fr2, NaturalFraction* expected)
 {
-	NaturalFraction result;
-	result = *fr1 - *fr2;
+	NaturalFraction result = *fr1 - *fr2;
 	printf("Expected: %d/%d, Got: %d/%d; ", expected->getNumerator(), expected->getDenominator(), result.getNumerator(), result.getDenominator());
 	if (result == *expected) return true;
 	else return false;
@@ -413,8 +418,7 @@ bool test42_44(NaturalFraction* fr, int term, NaturalFraction* expected)
 }*/
 bool test55_57(NaturalFraction* fr, int term, NaturalFraction* expected)
 {
-	NaturalFraction result;
-	result = *fr - term;
+	NaturalFraction result = *fr - term;
 	printf("Expected: %d/%d, Got: %d/%d; ", expected->getNumerator(), expected->getDenominator(), result.getNumerator(), result.getDenominator());
 	if (result == *expected) return true;
 	else return false;
@@ -428,8 +432,7 @@ bool test58_60(NaturalFraction* fr, int term, NaturalFraction* expected)
 }
 /*bool test61_63(NaturalFraction* fr1, NaturalFraction* fr2, NaturalFraction* expected)
 {
-	NaturalFraction result;
-	result = *fr1 * *fr2;
+	NaturalFraction result = *fr1 * *fr2;
 	printf("Expected: %d/%d, Got: %d/%d; ", expected->getNumerator(), expected->getDenominator(), result.getNumerator(), result.getDenominator());
 	if (result == *expected) return true;
 	else return false;
@@ -443,8 +446,7 @@ bool test58_60(NaturalFraction* fr, int term, NaturalFraction* expected)
 }*/
 /*bool test67_69(NaturalFraction* fr1, int term, NaturalFraction* expected)
 {
-	NaturalFraction result;
-	result = *fr1 * term;
+	NaturalFraction result = *fr1 * term;
 	printf("Expected: %d/%d, Got: %d/%d; ", expected->getNumerator(), expected->getDenominator(), result.getNumerator(), result.getDenominator());
 	if (result == *expected) return true;
 	else return false;
@@ -458,8 +460,7 @@ bool test58_60(NaturalFraction* fr, int term, NaturalFraction* expected)
 }*/
 /*bool test73_75(NaturalFraction* fr1, NaturalFraction* fr2, NaturalFraction* expected)
 {
-	NaturalFraction result;
-	result = *fr1 / *fr2;
+	NaturalFraction result = *fr1 / *fr2;
 	printf("Expected: %d/%d, Got: %d/%d; ", expected->getNumerator(), expected->getDenominator(), result.getNumerator(), result.getDenominator());
 	if (result == *expected) return true;
 	else return false;
@@ -473,8 +474,7 @@ bool test58_60(NaturalFraction* fr, int term, NaturalFraction* expected)
 }*/
 bool test79_81(NaturalFraction* fr1, int term, NaturalFraction* expected)
 {
-	NaturalFraction result;
-	result = *fr1 / term;
+	NaturalFraction result = *fr1 / term;
 	printf("Expected: %d/%d, Got: %d/%d; ", expected->getNumerator(), expected->getDenominator(), result.getNumerator(), result.getDenominator());
 	if (result == *expected) return true;
 	else return false;
