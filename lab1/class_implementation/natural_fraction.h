@@ -22,6 +22,7 @@ public:
 
 	NaturalFraction operator+(const NaturalFraction& term);
 	NaturalFraction operator+(int term);
+	NaturalFraction operator-(const NaturalFraction& term);
 	NaturalFraction operator-(int term);
 	NaturalFraction operator*(const NaturalFraction& m);
 	NaturalFraction operator*(int m);
@@ -30,16 +31,30 @@ public:
 	
 	void operator+=(const NaturalFraction& term);
 	void operator+=(int term);
+	void operator-=(const NaturalFraction& term);
 	void operator-=(int term);
 	void operator*=(const NaturalFraction& m);
 	void operator*=(int m);
 	void operator/=(const NaturalFraction& m);
 	void operator/=(int term);
+	
+	void operator++();
+	void operator--();
+	void operator++(int);
+	void operator--(int);
 
 	void operator=(const NaturalFraction& term);
 
 	bool operator==(const NaturalFraction& term);
 	bool operator!=(const NaturalFraction& term);
+	bool operator>=(const NaturalFraction& term);
+	bool operator>=(int term);
+	bool operator<=(const NaturalFraction& term);
+	bool operator<=(int term);
+	bool operator>(const NaturalFraction& term);
+	bool operator>(int term);
+	bool operator<(const NaturalFraction& term);
+	bool operator<(int term);
 
 	friend istream& operator>>(istream& input, NaturalFraction& fr);
 	friend ostream& operator<<(ostream& input, NaturalFraction& fr);
