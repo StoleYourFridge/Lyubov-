@@ -6,7 +6,7 @@ class NaturalFraction
 {
 private:
 	int numerator, denominator;
-	bool numeratorSet, denominatorSet;
+	bool numeratorSet, denominatorSet; // bool values are required to check if it is allowed to reduce a fraction after setting some value
 	void reduce();
 public:
 	NaturalFraction();
@@ -23,11 +23,17 @@ public:
 	NaturalFraction operator+(const NaturalFraction& term);
 	NaturalFraction operator+(int term);
 	NaturalFraction operator-(int term);
+	NaturalFraction operator*(const NaturalFraction& m);
+	NaturalFraction operator*(int m);
+	NaturalFraction operator/(const NaturalFraction& m);
 	NaturalFraction operator/(int term);
-
+	
 	void operator+=(const NaturalFraction& term);
 	void operator+=(int term);
 	void operator-=(int term);
+	void operator*=(const NaturalFraction& m);
+	void operator*=(int m);
+	void operator/=(const NaturalFraction& m);
 	void operator/=(int term);
 
 	void operator=(const NaturalFraction& term);
@@ -66,3 +72,15 @@ bool test73_75(NaturalFraction* fr1, NaturalFraction* fr2, NaturalFraction* expe
 bool test76_78(NaturalFraction* fr1, NaturalFraction* fr2, NaturalFraction* expected);				// tests 76-78: testing the ability to divide a fraction by a fraction (/=)
 bool test79_81(NaturalFraction* fr, int term, NaturalFraction* expected);							// tests 79-81: testing the ability to divide a fraction by a number (/)
 bool test82_84(NaturalFraction* fr, int term, NaturalFraction* expected);							// tests 82-84: testing the ability to divide a fraction by a number (/=)
+bool test85_86(NaturalFraction* fr, NaturalFraction* expected);										// tests 85-86: testing the preincrement operator (++fr)
+bool test87_88(NaturalFraction* fr, NaturalFraction* expected);										// tests 87-88: testing the postincrement operator (fr++)
+bool test89_90(NaturalFraction* fr, NaturalFraction* expected);										// tests 89-90: testing the predecrement operator (--fr)
+bool test91_92(NaturalFraction* fr, NaturalFraction* expected);										// tests 91-92: testing the postdecrement operator (fr--)
+bool test93_94(NaturalFraction* fr1, NaturalFraction* fr2, bool expected);							// test 93-94: testing the ability to compare two fractions (>)
+bool test95_96(NaturalFraction* fr1, NaturalFraction* fr2, bool expected);							// test 95-96: testing the ability to compare two fractions (>=)
+bool test97_98(NaturalFraction* fr1, NaturalFraction* fr2, bool expected);							// test 97-98: testing the ability to compare two fractions (<)
+bool test99_100(NaturalFraction* fr1, NaturalFraction* fr2, bool expected);							// test 99-100: testing the ability to compare two fractions (<=)
+bool test101_102(NaturalFraction* fr, int number, bool expected);									// test 101-102: testing the ability to compare a fraction and a number (>)
+bool test103_104(NaturalFraction* fr, int number, bool expected);									// test 103-104: testing the ability to compare a fraction and a number (>=)
+bool test105_106(NaturalFraction* fr, int number, bool expected);									// test 105-106: testing the ability to compare a fraction and a number (<)
+bool test107_108(NaturalFraction* fr, int number, bool expected);									// test 107-108: testing the ability to compare a fraction and a number (<=)
