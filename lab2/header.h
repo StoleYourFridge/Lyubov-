@@ -1,64 +1,21 @@
 #include <iostream>
-
-#pragma once
-using namespace std;
-
-enum SEX { // gender
-	male = 1,
-	female = 2
-};
+#include <string>
 
 class teacher {
+protected:
+	int age;
+	char sex;
+	string schoolSub;
+	int salary;
 public:
 	teacher(){}
 	~teacher(){}
-		
-	void setterName( std::string nameTeacher) {
-			this->name = nameTeacher;
-	}
-
-	void setterAge(int ageTeacher) {
-		this->age = ageTeacher;
-	}
-
-	void setterSalary(int salaryTeacher ) {
-		this->salary = salaryTeacher;
-	}
-
-	void setterSchoolSub(std::string schoolSub) {
-		this->schoolSub = schoolSub;
-	}
-
-	void setterSexTeacher(SEX sexTeahcer) { 
-		this->sex = sexTeahcer;
-	}
-
-
-	std::string getterName() {
-		return this->name;
-	}
-
-	int getterAge(int ageTeacher) {
-		return this->age;
-	}
-
-	std::string getterSchoolSub() {
-		return this->schoolSub;
-	}
-
-	int getterSalary() {
-		return this->salary;
-	}
-
-	SEX getterSexTeacher() {
-		return this->sex;
-	}
-
-
-	protected:
-		int age;
-		SEX sex; 
-		std::string name;
-		std::string schoolSub;
-		int salary;
+	void setAge(int input) { age = input }
+	void setSalary(int input) { salary = input; }
+	void setSchoolSub(string input) { schoolSub = input; }
+	void setSex(char input) { sex = input; }
+	int getAge() { return age; }
+	int getSalary() { return salary; }
+	string getSchoolSub() { return schoolSub; }
+	char getSex() { return sex; }
 };
