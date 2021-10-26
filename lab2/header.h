@@ -19,3 +19,19 @@ public:
 	string getSchoolSub() { return schoolSub; }
 	char getSex() { return sex; }
 };
+class lecturer : protected teacher
+{
+protected:
+	int attendance;
+	bool grades_for_free_exam;
+public:
+	void setAttendance(int input)
+	{
+		if (input > 100) attendance = 100;
+		else if (input < 0) attendance = 0;
+		else attendance = input;
+	}
+	void setGrades_for_free_exam(bool input) { grades_for_free_exam = input; }
+	int getAttendance() { return attendance; }
+	bool getGrades_for_free_exam() { return grades_for_free_exam; }
+};
