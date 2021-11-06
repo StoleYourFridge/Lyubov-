@@ -35,6 +35,8 @@ private:
 public:
 	Locomotive();
 	Locomotive(int speedInput, int serviceTimeLeftInput);
+	void increaseSpeedByOne();
+	void decreaseSpeedByOne();
 	void reduceServiceTimeLeftBy(int input);
 	int getSpeed();
 	int getServiceTimeLeft();
@@ -70,17 +72,20 @@ public:
 	void load();
 	void unload();
 	void disintegrate();
+	void reduceServiceTimeLeftBy(int input);
 	Locomotive getLocomotive();
 	Carriage* getCarriages();
 	int getCarriagesQuantity();
 	int* getPath();
 	int getPathLength();
 	bool isEnRoute();
+	bool isBroken();
 	int getCurrStation();
 	int getCurrStationType();
 	int getCurrDestination();
 	int getCurrDistanceToDestination();
 	int turnsLeftToDestination();
+	int getServiceTimeLeft();
 
 	void printInfo();
 };

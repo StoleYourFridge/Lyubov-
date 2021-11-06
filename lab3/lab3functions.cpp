@@ -339,6 +339,8 @@ Locomotive::Locomotive(int speedInput, int serviceTimeLeftInput)
 }
 
 void Locomotive::reduceServiceTimeLeftBy(int input) { serviceTimeLeft -= input; }
+void Locomotive::increaseSpeedByOne() { speed++; }
+void Locomotive::decreaseSpeedByOne() { speed--; }
 
 int Locomotive::getSpeed() { return speed; }
 int Locomotive::getServiceTimeLeft() { return serviceTimeLeft; }
@@ -379,7 +381,7 @@ void Train::stop()
 { 
 	enRoute = false;
 	currStation = currDestination;
-	currStationInPathIndex = (currStationInPathIndex % pathLength);
+	currStationInPathIndex = (currStationInPathIndex + 1) % pathLength;
 	currDestination = path[(currStationInPathIndex + 1) % pathLength];
 }
 void Train::load()
@@ -387,8 +389,16 @@ void Train::load()
 	int stationType = getCurrStationType();
 	for (int i = 0; i < carriagesQuantity; i++) 
 	{
-		if (carriages[i].isCargo() && !carriages[i].isLoaded() && (stationType != 0)) carriages[i].load();
-		if (!carriages[i].isCargo() && !carriages[i].isLoaded() && (stationType != 1)) carriages[i].load();
+		if (carriages[i].isCargo() && !carriages[i].isLoaded() && (stationType != 0))
+		{
+			carriages[i].load();
+			getLocomotive().decreaseSpeedByOne();
+		}
+		if (!carriages[i].isCargo() && !carriages[i].isLoaded() && (stationType != 1))
+		{
+			carriages[i].load();
+			getLocomotive().decreaseSpeedByOne();
+		}
 	}
 }
 void Train::unload()
@@ -396,11 +406,20 @@ void Train::unload()
 	int stationType = getCurrStationType();
 	for (int i = 0; i < carriagesQuantity; i++)
 	{
-		if (carriages[i].isCargo() && carriages[i].isLoaded() && (stationType != 0)) carriages[i].unload();
-		if (!carriages[i].isCargo() && carriages[i].isLoaded() && (stationType != 1)) carriages[i].unload();
+		if (carriages[i].isCargo() && carriages[i].isLoaded() && (stationType != 0))
+		{
+			carriages[i].unload();
+			getLocomotive().increaseSpeedByOne();
+		}
+		if (!carriages[i].isCargo() && carriages[i].isLoaded() && (stationType != 1))
+		{
+			carriages[i].unload();
+			getLocomotive().increaseSpeedByOne();
+		}
 	}
 }
 void Train::disintegrate() { broken = true; }
+void Train::reduceServiceTimeLeftBy(int input) { locomotive.reduceServiceTimeLeftBy(input); }
 
 Locomotive Train::getLocomotive() { return locomotive; }
 Carriage* Train::getCarriages() { return carriages; }
@@ -408,6 +427,7 @@ int Train::getCarriagesQuantity() { return carriagesQuantity; }
 int* Train::getPath() { return path; }
 int Train::getPathLength() { return pathLength; }
 bool Train::isEnRoute() { return enRoute; }
+bool Train::isBroken() { return broken; }
 int Train::getCurrStation() { return currStation; }
 int Train::getCurrStationType() { return currStationType; }
 int Train::getCurrDestination() { return currDestination; }
@@ -420,6 +440,7 @@ int Train::turnsLeftToDestination()
 	if (distanceLeft % speed != 0) timeLeft++;
 	return timeLeft;
 }
+int Train::getServiceTimeLeft() { return locomotive.getServiceTimeLeft(); }
 
 void Train::printInfo()
 {
@@ -446,36 +467,32 @@ int PlayArea::getStationsQuantity() { return stationsQuantity; }
 int PlayArea::getTrainsQuantity() { return trainsQuantity; }
 void PlayArea::sendTrain(int trainIndex)
 {
-	Train train = trains[trainIndex];
-	train.send();
+	trains[trainIndex].send();
 }
 void PlayArea::stopTrain(int trainIndex)
 {
-	Train train = trains[trainIndex];
-	train.stop();
-	train.setCurrStationType(stations[train.getCurrStation()]->type);
-	train.setCurrDistanceToDestination(getLinkWeight(train.getCurrStation(), train.getCurrDestination()));
+	trains[trainIndex].stop();
+	trains[trainIndex].setCurrStationType(stations[trains[trainIndex].getCurrStation()]->type);
+	trains[trainIndex].setCurrDistanceToDestination(getLinkWeight(trains[trainIndex].getCurrStation(), trains[trainIndex].getCurrDestination()));
 }
 void PlayArea::nextTurn()
 {
-	Train currTrain;
-	Locomotive currLocomotive;
 	int speed;
+	Train* currTrain;
 	for (int i = 0; i < trainsQuantity; i++)
 	{
-		currTrain = trains[i];
-		currLocomotive = currTrain.getLocomotive();
-		speed = currLocomotive.getSpeed();
-		if (currTrain.isEnRoute())
+		currTrain = &trains[i];
+		speed = currTrain->getLocomotive().getSpeed();
+		if (trains[i].isEnRoute())
 		{
-			currTrain.setCurrDistanceToDestination(currTrain.getCurrDistanceToDestination() - speed);
-			currLocomotive.reduceServiceTimeLeftBy(currTrain.getCarriagesQuantity());
-			if (currLocomotive.getServiceTimeLeft() < 0)
+			currTrain->setCurrDistanceToDestination(currTrain->getCurrDistanceToDestination() - speed);
+			currTrain->reduceServiceTimeLeftBy(speed);
+			if (currTrain->getServiceTimeLeft() < 0)
 			{
-				currTrain.disintegrate();
+				currTrain->disintegrate();
 				continue;
 			}
-			if (currTrain.getCurrDistanceToDestination() <= 0)
+			if (currTrain->getCurrDistanceToDestination() <= 0)
 			{
 				stopTrain(i);
 			}

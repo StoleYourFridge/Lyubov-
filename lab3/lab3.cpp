@@ -25,7 +25,7 @@ int main()
 		printf("1. Show current play area state\n");
 		printf("2. Show train info\n");
 		printf("3. Send/load/unload a train (trains)\n");
-		printf("4. Leave everything as-is and continue to the next turn\n");
+		printf("4. Continue to the next turn\n");
 		printf("5. End game (why would you even choose this, this gameplay is fire)\n");
 		cin >> choice;
 		printf("\n");
@@ -53,6 +53,11 @@ int main()
 				int editingTrainIndex;
 				printf("Which train would you like to send to the next station/load/unload?\n");
 				cin >> editingTrainIndex;
+				if (trains[editingTrainIndex].isBroken())
+				{
+					printf("This train is broken and can't move.\n");
+					break;
+				}
 				printf("\nWhat would you like to do with train %d?\n", editingTrainIndex);
 				printf("1. Send to the next station\n");
 				printf("2. Load\n");
@@ -70,8 +75,15 @@ int main()
 					}
 					else
 					{
-						playArea.sendTrain(editingTrainIndex);
-						printf("Train now en route to its next destination. ");
+						if (trains[editingTrainIndex].getLocomotive().getSpeed() <= 0)
+						{
+							printf("This train is overloaded and can't move. Consider unloading some of its carriages.\n");
+						}
+						else
+						{
+							playArea.sendTrain(editingTrainIndex);
+							printf("Train now en route to its next destination. ");
+						}
 					}
 					break;
 				}
@@ -108,7 +120,8 @@ int main()
 				}
 				printf("Would you like to do anything else? Y/N: ");
 				cin >> moreChanges;
-			} 			while (moreChanges == 'Y' || moreChanges == 'y');
+			} 			
+			while (moreChanges == 'Y' || moreChanges == 'y');
 			break;
 		}
 		case 4:
