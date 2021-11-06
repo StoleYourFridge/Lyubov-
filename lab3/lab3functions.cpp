@@ -50,9 +50,12 @@ void PlayArea::fillStationInfo(string input)
 		int currIndex = 0;
 		int stationIndex = scanForInt(input, &currIndex, '(');
 		currIndex++;
-		allocMemoryForAdjacent(stations[stationIndex], scanForInt(input, &currIndex, ')'));
+		allocMemoryForAdjacent(stations[stationIndex], scanForInt(input, &currIndex, ','));
+		currIndex += 2;
+		int currStationType = scanForInt(input, &currIndex, ')');
 		currIndex += 2;
 		setAdjacent(stations[stationIndex], input, currIndex);
+		stations[stationIndex]->type = currStationType;
 	}
 	catch (...)
 	{
@@ -407,6 +410,30 @@ void printPlayAreaCreationResult(PlayArea result)
 				}
 			}
 			else printf("0 ");
+		}
+		printf("\n");
+	}
+	printf("\n");
+	for (int i = 0; i < stationsQuantity; i++)
+	{
+		printf("Station %d - ", i);
+		switch (stations[i]->type)
+		{
+		case 0:
+		{
+			printf("passenger");
+			break;
+		}
+		case 1:
+		{
+			printf("cargo");
+			break;
+		}
+		case 2:
+		{
+			printf("passenger/cargo");
+			break;
+		}
 		}
 		printf("\n");
 	}

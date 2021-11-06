@@ -7,7 +7,7 @@ int main()
 	PlayArea playArea;
 	try 
 	{
-		playArea = PlayArea("examples/example1.txt");
+		playArea = PlayArea("examples/example2.txt");
 	}
 	catch (string errorText)
 	{
