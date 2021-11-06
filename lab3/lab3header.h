@@ -16,13 +16,15 @@ struct PlayAreaNode
 class Carriage
 {
 private:
-	bool isCargoCarriage;
-	bool isLoaded;
+	bool cargoCarriage;
+	bool loaded;
 public:
 	Carriage();
 	Carriage(bool isCargoCarriageInput, bool isLoadedInput);
-	bool getIsCargo();
-	bool getIsLoaded();
+	void load();
+	void unload();
+	bool isCargo();
+	bool isLoaded();
 };
 
 class Locomotive
@@ -33,7 +35,7 @@ private:
 public:
 	Locomotive();
 	Locomotive(int speedInput, int serviceTimeLeftInput);
-	void reduceSpeed();
+	void reduceServiceTimeLeftBy(int input);
 	int getSpeed();
 	int getServiceTimeLeft();
 };
@@ -46,16 +48,41 @@ private:
 	int carriagesQuantity;
 	int* path;
 	int pathLength;
+	int currStationInPathIndex = 0;
+	bool enRoute = false;
+	int currStation;
+	int currStationType;
+	int currDestination;
+	int currDistanceToDestination;
+	bool broken = false;
 public:
 	Train();
 	Train(int locomotiveSpeed, int locomotiveServiceTimeLeft, int carriagesQuantity, bool** carriagesInfo, int* pathInput, int pathLengthInput);
 	void setPath(int* input);
 	void setPathLength(int input);
+	void setEnRoute(bool input);
+	void setCurrStation(int input);
+	void setCurrStationType(int input);
+	void setCurrDestination(int input);
+	void setCurrDistanceToDestination(int input);
+	void send();
+	void stop();
+	void load();
+	void unload();
+	void disintegrate();
 	Locomotive getLocomotive();
 	Carriage* getCarriages();
 	int getCarriagesQuantity();
 	int* getPath();
 	int getPathLength();
+	bool isEnRoute();
+	int getCurrStation();
+	int getCurrStationType();
+	int getCurrDestination();
+	int getCurrDistanceToDestination();
+	int turnsLeftToDestination();
+
+	void printInfo();
 };
 
 class PlayArea
@@ -80,6 +107,7 @@ private:
 	int* readPath(string input, int pathLength, int startingIndex);
 	void allocMemoryForAdjacent(PlayAreaNode* station, int input);
 	void setAdjacent(PlayAreaNode* station, string input, int startingIndex);
+	int getLinkWeight(int from, int to);
 public:
 	PlayArea();
 	PlayArea(string inputFilePath);
@@ -89,6 +117,11 @@ public:
 	Train* getTrains();
 	int getStationsQuantity();
 	int getTrainsQuantity();
+	void sendTrain(int trainIndex);
+	void stopTrain(int trainIndex);
+	void nextTurn();
+
+	void printPlayAreaState();
 };
 
 void printPlayAreaCreationResult(PlayArea result);

@@ -42,7 +42,6 @@ void PlayArea::fillStationsInfo(ifstream& input)
 		throw errorText;
 	}
 }
-
 void PlayArea::fillStationInfo(string input)
 {
 	try
@@ -62,7 +61,6 @@ void PlayArea::fillStationInfo(string input)
 		throw;
 	}
 }
-
 void PlayArea::readStationInfoUntilUnderscore(ifstream& input)
 {
 	try
@@ -97,7 +95,6 @@ void PlayArea::fillTrainsInfo(ifstream& input)
 		throw errorText;
 	}
 }
-
 void PlayArea::fillTrainInfo(string input)
 {
 	try
@@ -116,6 +113,7 @@ void PlayArea::fillTrainInfo(string input)
 		currIndex += 2;
 		currCarriagesQuantity = scanForInt(input, &currIndex, ',');
 		currLocomotiveSpeed -= currCarriagesQuantity;
+		if (currLocomotiveSpeed <= 0) throw;
 		currIndex += 3;
 		allocMemoryForCarriagesInfo(&currCarriagesInfo, currCarriagesQuantity);
 		fillCarriagesInfo(currCarriagesInfo, input, &currIndex);
@@ -124,6 +122,18 @@ void PlayArea::fillTrainInfo(string input)
 		int* stationIndeces = readPath(input, pathLength, currIndex);
 		if (!isCyclicPath(stationIndeces, pathLength)) throw;
 		currTrain = Train(currLocomotiveSpeed, currLocomotiveServiceTimeLeft, currCarriagesQuantity, currCarriagesInfo, stationIndeces, pathLength);
+		currTrain.setCurrStation(stationIndeces[0]);
+		currTrain.setCurrStationType(stations[stationIndeces[0]]->type);
+		if (pathLength > 1)
+		{
+			currTrain.setCurrDestination(stationIndeces[1]);
+			currTrain.setCurrDistanceToDestination(getLinkWeight(stationIndeces[0], stationIndeces[1]));
+		}
+		else
+		{
+			currTrain.setCurrDestination(stationIndeces[0]);
+			currTrain.setCurrDistanceToDestination(getLinkWeight(stationIndeces[0], stationIndeces[0]));
+		}
 		trains[trainIndex] = currTrain;
 	}
 	catch (...)
@@ -131,7 +141,6 @@ void PlayArea::fillTrainInfo(string input)
 		throw;
 	}
 }
-
 void PlayArea::readTrainInfoUntilEOF(ifstream& input)
 {
 	try
@@ -147,7 +156,6 @@ void PlayArea::readTrainInfoUntilEOF(ifstream& input)
 		throw;
 	}
 }
-
 void PlayArea::allocMemoryForCarriagesInfo(bool*** carriagesInfo, int carriagesQuantity)
 {
 	try
@@ -163,7 +171,6 @@ void PlayArea::allocMemoryForCarriagesInfo(bool*** carriagesInfo, int carriagesQ
 		throw;
 	}
 }
-
 void PlayArea::fillCarriagesInfo(bool** carriagesInfo, string input, int* startingIndexAddress)
 {
 	try
@@ -187,7 +194,6 @@ void PlayArea::fillCarriagesInfo(bool** carriagesInfo, string input, int* starti
 		throw;
 	}
 }
-
 int PlayArea::calcPathLength(string input, int startingIndex)
 {
 	try
@@ -204,7 +210,6 @@ int PlayArea::calcPathLength(string input, int startingIndex)
 		throw;
 	}
 }
-
 int* PlayArea::readPath(string input, int pathLength, int startingIndex)
 {
 	try
@@ -236,7 +241,6 @@ bool PlayArea::directedLinkBetween(PlayAreaNode* node1, PlayAreaNode *node2)
 	}
 	return false;
 }
-
 bool PlayArea::isCyclicPath(int* stationIndeces, int pathLength)
 {
 	for (int currStation = 0; currStation < pathLength - 1; currStation++)
@@ -256,7 +260,6 @@ int PlayArea::scanForInt(string input, int* startingIndexAddress, char limiter)
 	}
 	return stoi(outputStr);
 }
-
 int PlayArea::scanForInt(string input, int* startingIndexAddress, char* limiters, int limitersQuantity)
 {
 	string outputStr;
@@ -283,7 +286,6 @@ void PlayArea::allocMemoryForAdjacent(PlayAreaNode* station, int input)
 	station->adjacentQuantity = input;
 	station->weights = new int[input];
 }
-
 void PlayArea::setAdjacent(PlayAreaNode* station, string input, int startingIndex)
 {
 	int currAdjacentIndex = 0;
@@ -298,30 +300,49 @@ void PlayArea::setAdjacent(PlayAreaNode* station, string input, int startingInde
 		}
 	}
 }
+int PlayArea::getLinkWeight(int from, int to)
+{
+	for (int currAdjacentIndex = 0; currAdjacentIndex < stations[from]->adjacentQuantity; currAdjacentIndex++)
+	{
+		if (stations[from]->adjacent[currAdjacentIndex]->id == to) return stations[from]->weights[currAdjacentIndex];
+	}
+}
+
+
+Carriage::Carriage()
+{
+	cargoCarriage = false;
+	loaded = false;
+}
+Carriage::Carriage(bool isCargoCarriageInput, bool isLoadedInput)
+{
+	cargoCarriage = isCargoCarriageInput;
+	loaded = isLoadedInput;
+}
+
+void Carriage::load() {loaded = true; }
+void Carriage::unload() { loaded = false; }
+
+bool Carriage::isCargo() { return cargoCarriage; }
+bool Carriage::isLoaded() { return loaded; }
+
 
 Locomotive::Locomotive()
 {
 	speed = 5;
 	serviceTimeLeft = 100;
 }
-
 Locomotive::Locomotive(int speedInput, int serviceTimeLeftInput)
 {
 	speed = speedInput;
 	serviceTimeLeft = serviceTimeLeftInput;
 }
 
-Carriage::Carriage()
-{
-	isCargoCarriage = false;
-	isLoaded = false;
-}
+void Locomotive::reduceServiceTimeLeftBy(int input) { serviceTimeLeft -= input; }
 
-Carriage::Carriage(bool isCargoCarriageInput, bool isLoadedInput)
-{
-	isCargoCarriage = isCargoCarriageInput;
-	isLoaded = isLoadedInput;
-}
+int Locomotive::getSpeed() { return speed; }
+int Locomotive::getServiceTimeLeft() { return serviceTimeLeft; }
+
 
 Train::Train()
 {
@@ -330,7 +351,6 @@ Train::Train()
 	carriages[0] = Carriage();
 	carriagesQuantity = 1;
 }
-
 Train::Train(int locomotiveSpeed, int locomotiveServiceTimeLeft, int carriagesQuantity, bool** carriagesInfo, int* pathInput, int pathLengthInput)
 {
 	locomotive = Locomotive(locomotiveSpeed, locomotiveServiceTimeLeft);
@@ -348,28 +368,133 @@ void Train::setPath(int* input)
 {
 	path = input;
 }
-
-void Train::setPathLength(int input)
-{
-	pathLength = input;
+void Train::setPathLength(int input) { pathLength = input; }
+void Train::setEnRoute(bool input) { enRoute = input; }
+void Train::setCurrStation(int input) { currStation = input; }
+void Train::setCurrStationType(int input) { currStationType = input; }
+void Train::setCurrDestination(int input) { currDestination = input; }
+void Train::setCurrDistanceToDestination(int input) { currDistanceToDestination = input; }
+void Train::send() { enRoute = true; }
+void Train::stop() 
+{ 
+	enRoute = false;
+	currStation = currDestination;
+	currStationInPathIndex = (currStationInPathIndex % pathLength);
+	currDestination = path[(currStationInPathIndex + 1) % pathLength];
 }
-
-PlayAreaNode** PlayArea::getStations() { return stations; }
-Train* PlayArea::getTrains() { return trains; }
-int PlayArea::getStationsQuantity() { return stationsQuantity; }
-int PlayArea::getTrainsQuantity() { return trainsQuantity; }
+void Train::load()
+{
+	int stationType = getCurrStationType();
+	for (int i = 0; i < carriagesQuantity; i++) 
+	{
+		if (carriages[i].isCargo() && !carriages[i].isLoaded() && (stationType != 0)) carriages[i].load();
+		if (!carriages[i].isCargo() && !carriages[i].isLoaded() && (stationType != 1)) carriages[i].load();
+	}
+}
+void Train::unload()
+{
+	int stationType = getCurrStationType();
+	for (int i = 0; i < carriagesQuantity; i++)
+	{
+		if (carriages[i].isCargo() && carriages[i].isLoaded() && (stationType != 0)) carriages[i].unload();
+		if (!carriages[i].isCargo() && carriages[i].isLoaded() && (stationType != 1)) carriages[i].unload();
+	}
+}
+void Train::disintegrate() { broken = true; }
 
 Locomotive Train::getLocomotive() { return locomotive; }
 Carriage* Train::getCarriages() { return carriages; }
 int Train::getCarriagesQuantity() { return carriagesQuantity; }
 int* Train::getPath() { return path; }
 int Train::getPathLength() { return pathLength; }
+bool Train::isEnRoute() { return enRoute; }
+int Train::getCurrStation() { return currStation; }
+int Train::getCurrStationType() { return currStationType; }
+int Train::getCurrDestination() { return currDestination; }
+int Train::getCurrDistanceToDestination() { return currDistanceToDestination; }
+int Train::turnsLeftToDestination()
+{
+	int speed = getLocomotive().getSpeed();
+	int distanceLeft = getCurrDistanceToDestination();
+	int timeLeft = distanceLeft / speed;
+	if (distanceLeft % speed != 0) timeLeft++;
+	return timeLeft;
+}
 
-int Locomotive::getSpeed() { return speed; }
-int Locomotive::getServiceTimeLeft() { return serviceTimeLeft; }
+void Train::printInfo()
+{
+	printf("\n");
+	if (isEnRoute()) printf("Currently en route to station %d\n", currDestination);
+	else printf("Currently waiting at station %d; next destination - station %d\n", currStation, currDestination);
+	printf("Locomotive speed: %d\n", getLocomotive().getSpeed());
+	printf("Locomotive service time left: %d\n", getLocomotive().getServiceTimeLeft());
+	printf("%d carriages\n", carriagesQuantity);
+	for (int i = 0; i < carriagesQuantity; i++)
+	{
+		printf("Carriage %d: ", i);
+		if (carriages[i].isCargo()) printf("cargo; ");
+		else printf("passenger; ");
+		if (carriages[i].isLoaded()) printf("loaded\n");
+		else printf("unloaded\n");
+	}
+}
 
-bool Carriage::getIsCargo() { return isCargoCarriage; }
-bool Carriage::getIsLoaded() { return isLoaded; }
+
+PlayAreaNode** PlayArea::getStations() { return stations; }
+Train* PlayArea::getTrains() { return trains; }
+int PlayArea::getStationsQuantity() { return stationsQuantity; }
+int PlayArea::getTrainsQuantity() { return trainsQuantity; }
+void PlayArea::sendTrain(int trainIndex)
+{
+	Train train = trains[trainIndex];
+	train.send();
+}
+void PlayArea::stopTrain(int trainIndex)
+{
+	Train train = trains[trainIndex];
+	train.stop();
+	train.setCurrStationType(stations[train.getCurrStation()]->type);
+	train.setCurrDistanceToDestination(getLinkWeight(train.getCurrStation(), train.getCurrDestination()));
+}
+void PlayArea::nextTurn()
+{
+	Train currTrain;
+	Locomotive currLocomotive;
+	int speed;
+	for (int i = 0; i < trainsQuantity; i++)
+	{
+		currTrain = trains[i];
+		currLocomotive = currTrain.getLocomotive();
+		speed = currLocomotive.getSpeed();
+		if (currTrain.isEnRoute())
+		{
+			currTrain.setCurrDistanceToDestination(currTrain.getCurrDistanceToDestination() - speed);
+			currLocomotive.reduceServiceTimeLeftBy(currTrain.getCarriagesQuantity());
+			if (currLocomotive.getServiceTimeLeft() < 0)
+			{
+				currTrain.disintegrate();
+				continue;
+			}
+			if (currTrain.getCurrDistanceToDestination() <= 0)
+			{
+				stopTrain(i);
+			}
+		}
+	}
+}
+
+void PlayArea::printPlayAreaState()
+{
+	printf("\n\n");
+	for (int i = 0; i < trainsQuantity; i++)
+	{
+		printf("Train %d is ", i);
+		if (trains[i].isEnRoute()) printf("en route to station %d; %d turns left", trains[i].getCurrDestination(), trains[i].turnsLeftToDestination());
+		else printf("waiting at station %d; next stop - station %d", trains[i].getCurrStation(), trains[i].getCurrDestination());
+		printf("\n");
+	}
+	printf("\n\n");
+}
 
 void printPlayAreaCreationResult(PlayArea result)
 {
@@ -454,9 +579,9 @@ void printPlayAreaCreationResult(PlayArea result)
 		for (int j = 0; j < currCarriagesQuantity; j++)
 		{
 			printf("Carriage %d: ", j);
-			if (trains[i].getCarriages()[j].getIsCargo()) printf("cargo carriage; ");
+			if (trains[i].getCarriages()[j].isCargo()) printf("cargo carriage; ");
 			else printf("passenger carriage; ");
-			if (trains[i].getCarriages()[j].getIsLoaded()) printf("loaded\n");
+			if (trains[i].getCarriages()[j].isLoaded()) printf("loaded\n");
 			else printf("not loaded\n");
 		}
 		printf("Path: ");
