@@ -81,6 +81,7 @@ private:
 	void allocMemoryForAdjacent(PlayAreaNode* station, int input);
 	void setAdjacent(PlayAreaNode* station, string input, int startingIndex);
 public:
+	PlayArea();
 	PlayArea(string inputFilePath);
 	bool directedLinkBetween(PlayAreaNode* node1, PlayAreaNode* node2);
 	bool isCyclicPath(int* stationIndeces, int pathLength);

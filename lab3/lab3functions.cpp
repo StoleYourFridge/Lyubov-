@@ -2,6 +2,8 @@
 
 using namespace std;
 
+PlayArea::PlayArea() {}
+
 PlayArea::PlayArea(string inputFilePath)
 {
 	fillPlayAreaFromFile(inputFilePath);
@@ -9,138 +11,218 @@ PlayArea::PlayArea(string inputFilePath)
 
 void PlayArea::fillPlayAreaFromFile(string filePath)
 {
-	ifstream input;
-	input.open(filePath);
-	fillStationsInfo(input);
-	fillTrainsInfo(input);
+	try 
+	{
+		ifstream input;
+		input.open(filePath);
+		fillStationsInfo(input);
+		fillTrainsInfo(input);
+	}
+	catch (string errorText)
+	{
+		throw errorText;
+	}
 }
 
 void PlayArea::fillStationsInfo(ifstream& input)
 {
-	string currLine;
-	getline(input, currLine);
-	stationsQuantity = stoi(currLine);
-	stations = new PlayAreaNode * [stationsQuantity];
-	for (int i = 0; i < stationsQuantity; i++) stations[i] = new PlayAreaNode;
-	readStationInfoUntilUnderscore(input);
-	for (int i = 0; i < stationsQuantity; i++) stations[i]->id = i;
+	try
+	{
+		string currLine;
+		getline(input, currLine);
+		stationsQuantity = stoi(currLine);
+		stations = new PlayAreaNode * [stationsQuantity];
+		for (int i = 0; i < stationsQuantity; i++) stations[i] = new PlayAreaNode;
+		readStationInfoUntilUnderscore(input);
+		for (int i = 0; i < stationsQuantity; i++) stations[i]->id = i;
+	}
+	catch (...)
+	{
+		string errorText = "Whoops! It seems like something went wrong while reading stations information. Please check input file correctness.\n\n";
+		throw errorText;
+	}
 }
 
 void PlayArea::fillStationInfo(string input)
 {
-	int currIndex = 0;
-	int stationIndex = scanForInt(input, &currIndex, '(');
-	currIndex++;
-	allocMemoryForAdjacent(stations[stationIndex], scanForInt(input, &currIndex, ')'));
-	currIndex += 2;
-	setAdjacent(stations[stationIndex], input, currIndex);
+	try
+	{
+		int currIndex = 0;
+		int stationIndex = scanForInt(input, &currIndex, '(');
+		currIndex++;
+		allocMemoryForAdjacent(stations[stationIndex], scanForInt(input, &currIndex, ')'));
+		currIndex += 2;
+		setAdjacent(stations[stationIndex], input, currIndex);
+	}
+	catch (...)
+	{
+		throw;
+	}
 }
 
 void PlayArea::readStationInfoUntilUnderscore(ifstream& input)
 {
-	string currLine;
-	getline(input, currLine);
-	while (currLine[0] != '_')
+	try
 	{
-		fillStationInfo(currLine);
+		string currLine;
 		getline(input, currLine);
+		while (currLine[0] != '_')
+		{
+			fillStationInfo(currLine);
+			getline(input, currLine);
+		}
+	}
+	catch (...)
+	{
+		throw;
 	}
 }
 
 void PlayArea::fillTrainsInfo(ifstream& input)
 {
-	string currLine;
-	getline(input, currLine);
-	trainsQuantity = stoi(currLine);
-	trains = new Train[trainsQuantity];
-	readTrainInfoUntilEOF(input);
+	try
+	{
+		string currLine;
+		getline(input, currLine);
+		trainsQuantity = stoi(currLine);
+		trains = new Train[trainsQuantity];
+		readTrainInfoUntilEOF(input);
+	}
+	catch (...)
+	{
+		string errorText = "Whoops! It seems like something went wrong while reading trains information. Please check input file correctness.\n\n";
+		throw errorText;
+	}
 }
 
 void PlayArea::fillTrainInfo(string input)
 {
-	Train currTrain;
-	int currLocomotiveSpeed;
-	int currLocomotiveServiceTimeLeft;
-	int currCarriagesQuantity;
-	bool** currCarriagesInfo;
-	int currIndex = 0;
-	int trainIndex = scanForInt(input, &currIndex, ':');
-	currIndex += 2;
-	currLocomotiveSpeed = scanForInt(input, &currIndex, ',');
-	currIndex += 2;
-	currLocomotiveServiceTimeLeft = scanForInt(input, &currIndex, ',');
-	currIndex += 2;
-	currCarriagesQuantity = scanForInt(input, &currIndex, ',');
-	currLocomotiveSpeed -= currCarriagesQuantity;
-	currIndex += 3;
-	allocMemoryForCarriagesInfo(&currCarriagesInfo, currCarriagesQuantity);
-	fillCarriagesInfo(currCarriagesInfo, input, &currIndex);
-	currIndex += 2;
-	int pathLength = calcPathLength(input, currIndex);
-	int* stationIndeces = readPath(input, pathLength, currIndex);
-	currTrain = Train(currLocomotiveSpeed, currLocomotiveServiceTimeLeft, currCarriagesQuantity, currCarriagesInfo, stationIndeces, pathLength);
-	trains[trainIndex] = currTrain;
+	try
+	{
+		Train currTrain;
+		int currLocomotiveSpeed;
+		int currLocomotiveServiceTimeLeft;
+		int currCarriagesQuantity;
+		bool** currCarriagesInfo;
+		int currIndex = 0;
+		int trainIndex = scanForInt(input, &currIndex, ':');
+		currIndex += 2;
+		currLocomotiveSpeed = scanForInt(input, &currIndex, ',');
+		currIndex += 2;
+		currLocomotiveServiceTimeLeft = scanForInt(input, &currIndex, ',');
+		currIndex += 2;
+		currCarriagesQuantity = scanForInt(input, &currIndex, ',');
+		currLocomotiveSpeed -= currCarriagesQuantity;
+		currIndex += 3;
+		allocMemoryForCarriagesInfo(&currCarriagesInfo, currCarriagesQuantity);
+		fillCarriagesInfo(currCarriagesInfo, input, &currIndex);
+		currIndex += 2;
+		int pathLength = calcPathLength(input, currIndex);
+		int* stationIndeces = readPath(input, pathLength, currIndex);
+		if (!isCyclicPath(stationIndeces, pathLength)) throw;
+		currTrain = Train(currLocomotiveSpeed, currLocomotiveServiceTimeLeft, currCarriagesQuantity, currCarriagesInfo, stationIndeces, pathLength);
+		trains[trainIndex] = currTrain;
+	}
+	catch (...)
+	{
+		throw;
+	}
 }
 
 void PlayArea::readTrainInfoUntilEOF(ifstream& input)
 {
-	string currLine;
-	while (getline(input, currLine) && currLine != "")
+	try
 	{
-		fillTrainInfo(currLine);
+		string currLine;
+		while (getline(input, currLine) && currLine != "")
+		{
+			fillTrainInfo(currLine);
+		}
+	}
+	catch (...)
+	{
+		throw;
 	}
 }
 
 void PlayArea::allocMemoryForCarriagesInfo(bool*** carriagesInfo, int carriagesQuantity)
 {
-	*carriagesInfo = new bool* [carriagesQuantity];
-	for (int i = 0; i < carriagesQuantity; i++)
+	try
 	{
-		(*carriagesInfo)[i] = new bool[2];
+		*carriagesInfo = new bool* [carriagesQuantity];
+		for (int i = 0; i < carriagesQuantity; i++)
+		{
+			(*carriagesInfo)[i] = new bool[2];
+		}
+	}
+	catch (...)
+	{
+		throw;
 	}
 }
 
 void PlayArea::fillCarriagesInfo(bool** carriagesInfo, string input, int* startingIndexAddress)
 {
-	int currIndex = *startingIndexAddress;
-	int currCarriageIndex = 0;
-	while (input[currIndex] != ' ')
+	try
 	{
-		if (input[currIndex] == 'Y') carriagesInfo[currCarriageIndex][0] = true;
-		else carriagesInfo[currCarriageIndex][0] = false;
-		currIndex += 2;
-		if (input[currIndex] == 'Y') carriagesInfo[currCarriageIndex][1] = true;
-		else carriagesInfo[currCarriageIndex][1] = false;
-		currIndex += 3;
-		currCarriageIndex++;
+		int currIndex = *startingIndexAddress;
+		int currCarriageIndex = 0;
+		while (input[currIndex] != ' ')
+		{
+			if (input[currIndex] == 'Y') carriagesInfo[currCarriageIndex][0] = true;
+			else carriagesInfo[currCarriageIndex][0] = false;
+			currIndex += 2;
+			if (input[currIndex] == 'Y') carriagesInfo[currCarriageIndex][1] = true;
+			else carriagesInfo[currCarriageIndex][1] = false;
+			currIndex += 3;
+			currCarriageIndex++;
+		}
+		*startingIndexAddress = currIndex;
 	}
-	*startingIndexAddress = currIndex;
+	catch (...)
+	{
+		throw;
+	}
 }
 
 int PlayArea::calcPathLength(string input, int startingIndex)
 {
-	int pathLength = 0;
-	for (int i = startingIndex; input[i] != ')'; i++)
+	try
 	{
-		if (input[i] == ',') pathLength++;
+		int pathLength = 0;
+		for (int i = startingIndex; input[i] != ')'; i++)
+		{
+			if (input[i] == ',') pathLength++;
+		}
+		return pathLength + 1;
 	}
-	return pathLength + 1;
+	catch (...)
+	{
+		throw;
+	}
 }
 
 int* PlayArea::readPath(string input, int pathLength, int startingIndex)
 {
-	int currIndex = startingIndex;
-	int* stationIndeces = new int[pathLength];
-	int currPathIndex = 0;
-	char* limiters = new char[2];
-	limiters[0] = ',';
-	limiters[1] = ')';
-	for (currIndex; currIndex < size(input) && input[currIndex] != ')'; currIndex++)
+	try
 	{
-		stationIndeces[currPathIndex++] = scanForInt(input, &currIndex, limiters, 2);
-		currIndex++;
+		int currIndex = startingIndex;
+		int* stationIndeces = new int[pathLength];
+		int currPathIndex = 0;
+		char* limiters = new char[2];
+		limiters[0] = ',';
+		limiters[1] = ')';
+		for (currIndex; currIndex < size(input) && input[currIndex] != ')'; currIndex++)
+		{
+			stationIndeces[currPathIndex++] = scanForInt(input, &currIndex, limiters, 2);
+			currIndex++;
+		}
+		return stationIndeces;
 	}
-	return stationIndeces;
+	catch (...)
+	{
+		throw;
+	}
 }
 
 bool PlayArea::directedLinkBetween(PlayAreaNode* node1, PlayAreaNode *node2)
