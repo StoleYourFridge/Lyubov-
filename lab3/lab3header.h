@@ -69,6 +69,7 @@ public:
 	void setCurrDistanceToDestination(int input);
 	void send();
 	void stop();
+	void advance();
 	void load();
 	void unload();
 	void disintegrate();

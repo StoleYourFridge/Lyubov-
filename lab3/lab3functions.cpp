@@ -380,43 +380,45 @@ void Train::send() { enRoute = true; }
 void Train::stop() 
 { 
 	enRoute = false;
-	currStation = currDestination;
-	currStationInPathIndex = (currStationInPathIndex + 1) % pathLength;
-	currDestination = path[(currStationInPathIndex + 1) % pathLength];
+	advance();
 }
 void Train::load()
 {
-	int stationType = getCurrStationType();
 	for (int i = 0; i < carriagesQuantity; i++) 
 	{
-		if (carriages[i].isCargo() && !carriages[i].isLoaded() && (stationType != 0))
+		if (carriages[i].isCargo() && !carriages[i].isLoaded() && (currStationType != 0))
 		{
 			carriages[i].load();
-			getLocomotive().decreaseSpeedByOne();
+			locomotive.decreaseSpeedByOne();
 		}
-		if (!carriages[i].isCargo() && !carriages[i].isLoaded() && (stationType != 1))
+		if (!carriages[i].isCargo() && !carriages[i].isLoaded() && (currStationType != 1))
 		{
 			carriages[i].load();
-			getLocomotive().decreaseSpeedByOne();
+			locomotive.decreaseSpeedByOne();
 		}
 	}
 }
 void Train::unload()
 {
-	int stationType = getCurrStationType();
 	for (int i = 0; i < carriagesQuantity; i++)
 	{
-		if (carriages[i].isCargo() && carriages[i].isLoaded() && (stationType != 0))
+		if (carriages[i].isCargo() && carriages[i].isLoaded() && (currStationType != 0))
 		{
 			carriages[i].unload();
-			getLocomotive().increaseSpeedByOne();
+			locomotive.increaseSpeedByOne();
 		}
-		if (!carriages[i].isCargo() && carriages[i].isLoaded() && (stationType != 1))
+		if (!carriages[i].isCargo() && carriages[i].isLoaded() && (currStationType != 1))
 		{
 			carriages[i].unload();
-			getLocomotive().increaseSpeedByOne();
+			locomotive.increaseSpeedByOne();
 		}
 	}
+}
+void Train::advance()
+{
+	currStation = currDestination;
+	currStationInPathIndex = (currStationInPathIndex + 1) % pathLength;
+	currDestination = path[(currStationInPathIndex + 1) % pathLength];
 }
 void Train::disintegrate() { broken = true; }
 void Train::reduceServiceTimeLeftBy(int input) { locomotive.reduceServiceTimeLeftBy(input); }
@@ -434,11 +436,10 @@ int Train::getCurrDestination() { return currDestination; }
 int Train::getCurrDistanceToDestination() { return currDistanceToDestination; }
 int Train::turnsLeftToDestination()
 {
-	int speed = getLocomotive().getSpeed();
-	int distanceLeft = getCurrDistanceToDestination();
-	int timeLeft = distanceLeft / speed;
-	if (distanceLeft % speed != 0) timeLeft++;
-	return timeLeft;
+	int speed = locomotive.getSpeed();
+	int turnsLeft = currDistanceToDestination / speed;
+	if (currDistanceToDestination % speed != 0) turnsLeft++;
+	return turnsLeft;
 }
 int Train::getServiceTimeLeft() { return locomotive.getServiceTimeLeft(); }
 
@@ -502,6 +503,30 @@ void PlayArea::nextTurn()
 
 void PlayArea::printPlayAreaState()
 {
+	printf("\n=================================================");
+	printf("\n\n");
+	for (int i = 0; i < stationsQuantity; i++)
+	{
+		printf("Station %d - ", i);
+		switch (stations[i]->type)
+		{
+		case 0:
+		{
+			printf("cargo");
+			break;
+		}
+		case 1:
+		{
+			printf("passenger");
+			break;
+		}
+		case 2:
+		{
+			printf("cargo/passenger");
+			break;
+		}
+		}
+	}
 	printf("\n\n");
 	for (int i = 0; i < trainsQuantity; i++)
 	{
@@ -510,6 +535,7 @@ void PlayArea::printPlayAreaState()
 		else printf("waiting at station %d; next stop - station %d", trains[i].getCurrStation(), trains[i].getCurrDestination());
 		printf("\n");
 	}
+	printf("=================================================");
 	printf("\n\n");
 }
 
