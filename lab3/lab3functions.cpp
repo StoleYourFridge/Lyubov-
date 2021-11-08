@@ -361,6 +361,7 @@ Train::Train(int locomotiveSpeed, int locomotiveServiceTimeLeft, int carriagesQu
 	for (int currCarriage = 0; currCarriage < carriagesQuantity; currCarriage++)
 	{
 		carriages[currCarriage] = Carriage(carriagesInfo[currCarriage][0], carriagesInfo[currCarriage][1]);
+		if (carriagesInfo[currCarriage][1]) locomotive.decreaseSpeedByOne();
 	}
 	path = pathInput;
 	pathLength = pathLengthInput;
@@ -386,12 +387,12 @@ void Train::load()
 {
 	for (int i = 0; i < carriagesQuantity; i++) 
 	{
-		if (carriages[i].isCargo() && !carriages[i].isLoaded() && (currStationType != 0))
+		if (carriages[i].isCargo() && !carriages[i].isLoaded() && (currStationType != 1))
 		{
 			carriages[i].load();
 			locomotive.decreaseSpeedByOne();
 		}
-		if (!carriages[i].isCargo() && !carriages[i].isLoaded() && (currStationType != 1))
+		if (!carriages[i].isCargo() && !carriages[i].isLoaded() && (currStationType != 0))
 		{
 			carriages[i].load();
 			locomotive.decreaseSpeedByOne();
@@ -402,12 +403,12 @@ void Train::unload()
 {
 	for (int i = 0; i < carriagesQuantity; i++)
 	{
-		if (carriages[i].isCargo() && carriages[i].isLoaded() && (currStationType != 0))
+		if (carriages[i].isCargo() && carriages[i].isLoaded() && (currStationType != 1))
 		{
 			carriages[i].unload();
 			locomotive.increaseSpeedByOne();
 		}
-		if (!carriages[i].isCargo() && carriages[i].isLoaded() && (currStationType != 1))
+		if (!carriages[i].isCargo() && carriages[i].isLoaded() && (currStationType != 0))
 		{
 			carriages[i].unload();
 			locomotive.increaseSpeedByOne();
@@ -448,8 +449,8 @@ void Train::printInfo()
 	printf("\n");
 	if (isEnRoute()) printf("Currently en route to station %d\n", currDestination);
 	else printf("Currently waiting at station %d; next destination - station %d\n", currStation, currDestination);
-	printf("Locomotive speed: %d\n", getLocomotive().getSpeed());
-	printf("Locomotive service time left: %d\n", getLocomotive().getServiceTimeLeft());
+	printf("Locomotive speed: %d\n", locomotive.getSpeed());
+	printf("Locomotive service time left: %d\n", locomotive.getServiceTimeLeft());
 	printf("%d carriages\n", carriagesQuantity);
 	for (int i = 0; i < carriagesQuantity; i++)
 	{
@@ -503,8 +504,7 @@ void PlayArea::nextTurn()
 
 void PlayArea::printPlayAreaState()
 {
-	printf("\n=================================================");
-	printf("\n\n");
+	printf("\n=================================================\n");
 	for (int i = 0; i < stationsQuantity; i++)
 	{
 		printf("Station %d - ", i);
@@ -526,6 +526,7 @@ void PlayArea::printPlayAreaState()
 			break;
 		}
 		}
+		printf("\n");
 	}
 	printf("\n\n");
 	for (int i = 0; i < trainsQuantity; i++)
@@ -546,21 +547,56 @@ void printPlayAreaCreationResult(PlayArea result)
 	printf("Created a play area graph with %d stations\n", stationsQuantity);
 	printf("Defined by the following matrix:\n\n");
 	PlayAreaNode** stations = result.getStations();
+	int maxOffset = -1, currOffset;
+	for (int i = 0; i < stationsQuantity; i++)
+	{
+		for (int j = 0; j < stationsQuantity; j++)
+		{
+			if (result.directedLinkBetween(stations[i], stations[j])) 
+			{
+				currOffset = 0;
+				for (int currAdjNode = 0; currAdjNode < stations[i]->adjacentQuantity; currAdjNode++)
+				{
+					if (stations[i]->adjacent[currAdjNode]->id == stations[j]->id)
+					{
+						int currPowerOfTen = 10;
+						while (currPowerOfTen < stations[i]->weights[currAdjNode])
+						{
+							currPowerOfTen *= 10;
+							currOffset++;
+						}
+						if (currOffset > maxOffset) maxOffset = currOffset;
+					}
+				}
+			}
+		}
+	}
 	printf("   ");
 	for (int j = 0; j < 2; j++)
 	{
 		if (j == 1) printf("   ");
 		for (int i = 0; i < stationsQuantity; i++)
 		{
-			if (j == 0) printf("%d ", i);
+			if (j == 0)
+			{
+				printf("%d ", i);
+				for (int k = 0; k < maxOffset; k++) printf(" ");
+			}
 			if (j == 1)
 			{
-				if (i < stationsQuantity - 1) printf("__");
+				if (i < stationsQuantity - 1)
+				{
+					printf("__");
+					for (int k = 0; k < maxOffset; k++) printf("_");
+				}
 				else printf("_");
 			}
 		}
 		printf("\n");
 	}
+	int currWeight;
+	int currPowerOfTen;
+	int decimalPlacesInCurrWeight;
 	for (int i = 0; i < stationsQuantity; i++)
 	{
 		printf("%d |", i);
@@ -568,16 +604,28 @@ void printPlayAreaCreationResult(PlayArea result)
 		{
 			if (result.directedLinkBetween(stations[i], stations[j]))
 			{
+				currPowerOfTen = 10;
+				decimalPlacesInCurrWeight = 1;
 				for (int currAdjNode = 0; currAdjNode < stations[i]->adjacentQuantity; currAdjNode++)
 				{
 					if (stations[i]->adjacent[currAdjNode]->id == stations[j]->id)
 					{
-						printf("%d ", stations[i]->weights[currAdjNode]);
-						break;
+						currWeight = stations[i]->weights[currAdjNode];
+						while (currPowerOfTen <= currWeight)
+						{
+							currPowerOfTen *= 10;
+							decimalPlacesInCurrWeight++;
+						}
+						printf("%d ", currWeight);
+						for (int k = decimalPlacesInCurrWeight - 1; k < maxOffset; k++) printf(" ");
 					}
 				}
 			}
-			else printf("0 ");
+			else
+			{
+				printf("0 ");
+				for (int k = 0; k < maxOffset; k++) printf(" ");
+			}
 		}
 		printf("\n");
 	}
