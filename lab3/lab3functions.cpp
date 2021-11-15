@@ -112,7 +112,6 @@ void PlayArea::fillTrainInfo(string input)
 		currLocomotiveServiceTimeLeft = scanForInt(input, &currIndex, ',');
 		currIndex += 2;
 		currCarriagesQuantity = scanForInt(input, &currIndex, ',');
-		currLocomotiveSpeed -= currCarriagesQuantity;
 		if (currLocomotiveSpeed <= 0) throw;
 		currIndex += 3;
 		allocMemoryForCarriagesInfo(&currCarriagesInfo, currCarriagesQuantity);
@@ -355,7 +354,7 @@ Train::Train()
 }
 Train::Train(int locomotiveSpeed, int locomotiveServiceTimeLeft, int carriagesQuantity, bool** carriagesInfo, int* pathInput, int pathLengthInput)
 {
-	locomotive = Locomotive(locomotiveSpeed, locomotiveServiceTimeLeft);
+	locomotive = Locomotive(locomotiveSpeed - carriagesQuantity, locomotiveServiceTimeLeft);
 	carriages = new Carriage[carriagesQuantity];
 	(*this).carriagesQuantity = carriagesQuantity;
 	for (int currCarriage = 0; currCarriage < carriagesQuantity; currCarriage++)
