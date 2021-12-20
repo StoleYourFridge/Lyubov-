@@ -87,3 +87,36 @@ template <typename T> std::vector<T> bucket_sort(std::vector<T> input_arr, int b
 	}
 	return result;
 }
+
+template <typename T> void selection_sort(std::vector<T>& input_arr)
+{
+	T curr_min;
+	int curr_min_index = 0;
+	int curr_first_unsorted_element_index = 0;
+	bool change_made;
+	while(curr_first_unsorted_element_index < input_arr.size()) // could've been a for cycle, but this is more semantic i believe
+	{
+		change_made = false;
+		curr_min = input_arr[curr_first_unsorted_element_index]; // setting the current minimal element to be the first unsorted element
+		for (int i = curr_first_unsorted_element_index; i < input_arr.size(); i++) // we only need to check the unsorted part
+		{
+			if (curr_min > input_arr[i]) // just the default algorithm of finding the minimal element in an array
+			{
+				curr_min = input_arr[i];
+				curr_min_index = i;
+				change_made = true;
+			}
+		}
+		if (!change_made) // aka the first unsorted element was the minimal one, and no swap needs to happen
+		{
+			curr_first_unsorted_element_index++;
+		}
+		else // aka the minimal element is somewhere inside the unsorted part of the array, so a swap needs to happen
+		{
+			T dummy = input_arr[curr_first_unsorted_element_index]; // nothing special here
+			input_arr[curr_first_unsorted_element_index] = curr_min;
+			input_arr[curr_min_index] = dummy;
+			curr_first_unsorted_element_index++;
+		}
+	} 	
+}
